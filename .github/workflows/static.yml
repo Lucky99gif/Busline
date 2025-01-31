@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Login - Bus Reservation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white; /* Set body background to white */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container, #bus-section {
+      width: 350px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    h2, h3 {
+      color: #333;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    .booking-list, .cancel-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .cancel-btn {
+      color: red;
+      cursor: pointer;
+    }
+    .bus-list {
+      margin-bottom: 20px;
+    }
+    .bus-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #f4f4f4;
+      border-radius: 5px;
+    }
+    .logo {
+      width: 100px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Page -->
+  <div class="container" id="login-section">
+    <img src="https://media-hosting.imagekit.io//f17f0051226d4925/1738267088136.jpg?Expires=1832875161&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=YTCGiXvkC9XEGt93HqSBf4CNTRT7t1WBs9z7w5pQFLIiiih-t6L30vI3koRjNtbtsGSIPO2p6obmAtHvIjT2vsyvOqsmBzKf2NnaA1vE4zqAQEO3~s1p34RrZZRUAW1KdeVHJhu9-jEFoWrMqiMVEQtMMehCMPnf9Q0kbKQw4WHjlGoyL~Y-M0PLTHfN43oJBZhYxtAGaOOnNfBGz~YWOQ8Jb0GmFQe~PonXg7t-JFYPnHQDJ-nFOa6coyha40Zbebpy9CPH-i8nh0xyQzsQlhvHsgqv8K7y3B3I5Wshs4jqZwBqKLjU5NMnw6ZfRdFwL5wO3MJlDl0oF9LUN7df4g__" alt="Logo" class="logo">
+    <h2>Login</h2>
+    <div class="error" id="login-error"></div>
+    <input type="text" id="username" placeholder="Username">
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password">
+      <span class="toggle-password" onclick="togglePassword()">👁</span>
+    </div>
+    <button class="btn" onclick="login()">Login</button>
+  </div>
+
+  <!-- Bus Reservation System -->
+  <div id="bus-section" style="display:none;">
+    <header>
+      <h1>Online Bus Reservation System</h1>
+      <button class="btn" style="background-color: red;" onclick="logout()">Logout</button>
+    </header>
+
+    <h3>Available Buses</h3>
+    <div class="bus-list" id="bus-list">
+      <!-- Available buses will be listed here -->
+    </div>
+
+    <h3>Book Bus</h3>
+    <select id="bus-select">
+      <!-- Buses will be populated here -->
+    </select>
+    <input type="number" id="seats" placeholder="Seats to Book" min="1">
+    <button class="btn" onclick="bookBus()">Book</button>
+
+    <h3>Booking History</h3>
+    <div id="booking-history"></div>
+  </div>
+
+  <script>
+    const USERS = { RavinderSingh: "1234567", AksharTomar: "1234567" };
+
+    // Sample data for buses
+    const buses = {
+      1: { route: "Delhi to Jaipur", price: 500, availableSeats: 30 },
+      2: { route: "Mumbai to Pune", price: 300, availableSeats: 20 },
+      3: { route: "Chennai to Bengaluru", price: 400, availableSeats: 25 }
+    };
+
+    let bookings = [];
+
+    // Show/Hide Password
+    function togglePassword() {
+      const passwordField = document.getElementById("password");
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+      } else {
+        passwordField.type = "password";
+      }
+    }
+
+    // Login Function
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const errorMessage = document.getElementById("login-error");
+
+      if (!username || !password) {
+        errorMessage.textContent = "Username and password cannot be empty!";
+        return;
+      }
+
+      if (USERS[username] && USERS[username] === password) {
+        showBusReservation();
+      } else {
+        errorMessage.textContent = "Invalid username or password!";
+      }
+    }
+
+    // Logout Function
+    function logout() {
+      bookings = [];
+      localStorage.removeItem("loggedIn");
+      showLoginPage();
+    }
+
+    // Show Login Page
+    function showLoginPage() {
+      document.getElementById("login-section").style.display = "block";
+      document.getElementById("bus-section").style.display = "none";
+    }
+
+    // Show Bus Reservation Page
+    function showBusReservation() {
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("bus-section").style.display = "block";
+      displayAvailableBuses();
+      displayBookingHistory();
+    }
+
+    // Display Available Buses
+    function displayAvailableBuses() {
+      const busList = document.getElementById("bus-list");
+      const busSelect = document.getElementById("bus-select");
+      busList.innerHTML = '';  // Clear the existing bus list
+      busSelect.innerHTML = '';  // Clear the select options
+
+      for (const busId in buses) {
+        const bus = buses[busId];
+
+        // Add bus to available buses list
+        const busItem = document.createElement('div');
+        busItem.classList.add('bus-item');
+        busItem.innerHTML = `
+          <p>${bus.route} - ₹${bus.price} - Available Seats: ${bus.availableSeats}</p>
+        `;
+        busList.appendChild(busItem);
+
+        // Add bus to select dropdown
+        const option = document.createElement('option');
+        option.value = busId;
+        option.innerHTML = `${bus.route} - ₹${bus.price} - Available Seats: ${bus.availableSeats}`;
+        busSelect.appendChild(option);
+      }
+    }
+
+    // Book Bus Function
+    function bookBus() {
+      const busId = document.getElementById("bus-select").value;
+      const seats = parseInt(document.getElementById("seats").value);
+
+      if (isNaN(seats) || seats <= 0) {
+        alert("Please enter a valid number of seats.");
+        return;
+      }
+
+      const bus = buses[busId];
+
+      if (seats > bus.availableSeats) {
+        alert("Not enough available seats.");
+        return;
+      }
+
+      const totalCost = seats * bus.price;
+      bus.availableSeats -= seats;  // Reduce the available seats
+
+      bookings.push({
+        id: busId,
+        route: bus.route,
+        seats,
+        totalCost
+      });
+
+      alert(`Successfully booked ${seats} seat(s) for ${bus.route} at ₹${totalCost}.`);
+      displayAvailableBuses();
+      displayBookingHistory();
+    }
+
+    // Cancel Booking Function
+    function cancelBooking(index) {
+      const booking = bookings[index];
+      const bus = buses[booking.id];
+
+      bus.availableSeats += booking.seats;  // Increase the available seats
+      bookings.splice(index, 1);
+      displayAvailableBuses();
+      displayBookingHistory();
+    }
+
+    // Display Booking History
+    function displayBookingHistory() {
+      const historyContainer = document.getElementById("booking-history");
+      historyContainer.innerHTML = '';
+
+      if (bookings.length === 0) {
+        historyContainer.innerHTML = "<p>No bookings found.</p>";
+        return;
+      }
+
+      bookings.forEach((booking, index) => {
+        const bookingElement = document.createElement('div');
+        bookingElement.classList.add('booking-list');
+        bookingElement.innerHTML = `
+          <p>${booking.route} - ${booking.seats} seat(s) - ₹${booking.totalCost}</p>
+          <span class="cancel-btn" onclick="cancelBooking(${index})">Cancel</span>
+        `;
+        historyContainer.appendChild(bookingElement);
+      });
+    }
+
+    // Auto-login if remembered
+    if (localStorage.getItem("loggedIn")) {
+      showBusReservation();
+    } else {
+      showLoginPage();
+    }
+  </script>
+
+</body>
+</html>
