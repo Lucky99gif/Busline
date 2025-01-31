@@ -6,7 +6,7 @@
   <title>Secure Login - Bus Reservation</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+     font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background: white; /* Set body background to white */
